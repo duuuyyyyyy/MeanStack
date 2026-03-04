@@ -1,45 +1,66 @@
-<div class="app-container">
-  <h1 class="app-title">Books Management System</h1>
+<p>Books Application</p>
 
-  <div class="form-card">
-    <input id="newBook" placeholder="Enter book title" type="text" />
-    <input id="newDesc" placeholder="Enter description" type="text" />
-    <input id="newAuthor" placeholder="Enter author name" type="text" />
-    <input id="newGenre" placeholder="Enter genre" type="text" />
-    <input id="newPrice" placeholder="Enter price" type="number" step="0.01" />
-    <button class="btn-add" (click)="addBook()">📚 Add New Book</button>
+<form class="form-box" [formGroup]="bookForm" (ngSubmit)="addBook()">
+  <label class="form-label" for="newBook">Title</label>
+  <input class="form-input" id="newBook" placeholder="title" formControlName="title">
+  <div class="error" *ngIf="titleCtrl?.touched && titleCtrl?.invalid">
+    <span *ngIf="titleCtrl?.errors?.['required']">Title is required.</span>
+    <span *ngIf="titleCtrl?.errors?.['minlength']">At least 3 characters.</span>
+    <span *ngIf="titleCtrl?.errors?.['maxlength']">Max 100 characters.</span>
   </div>
 
-  <div class="book-list">
-    @for (book of books; track book.id) {
-      <div class="book-card">
-        <div class="book-info">
-          <div class="book-title">
-            <b>Title:</b> {{ book.title }}
-          </div>
-          <div class="book-desc">
-            <b>Description:</b> {{ book.desc }}
-          </div>
-          <div class="book-meta">
-            <span class="book-author">
-              <b>Author:</b> {{ book.author || 'Unknown' }}
-            </span>
-            <span class="book-genre">
-              <b>Genre:</b> {{ book.genre || 'Uncategorized' }}
-            </span>
-            <span class="book-price">
-              <b>Price:</b> ${{ book.price }}
-            </span>
-          </div>
-        </div>
-        <button class="btn-delete" (click)="deleteBook(book.id)">
-          🗑️ Remove
-        </button>
-      </div>
-    } @empty {
-      <div class="empty-state">
-        📚 No books available yet. Add your first book above!
-      </div>
-    }
+  <label class="form-label" for="newDesc">Description</label>
+  <textarea class="form-input text-area" id="newDesc" placeholder="description" formControlName="description"></textarea>
+  <div class="error" *ngIf="descriptionCtrl?.touched && descriptionCtrl?.invalid">
+    <span *ngIf="descriptionCtrl?.errors?.['maxlength']">Max 1000 characters.</span>
   </div>
+
+  <label class="form-label" for="newAuthor">Author</label>
+  <input class="form-input" id="newAuthor" placeholder="author" formControlName="author">
+  <div class="error" *ngIf="authorCtrl?.touched && authorCtrl?.invalid">
+    <span *ngIf="authorCtrl?.errors?.['required']">Author is required.</span>
+    <span *ngIf="authorCtrl?.errors?.['minlength']">At least 3 characters.</span>
+    <span *ngIf="authorCtrl?.errors?.['pattern']">Letters and spaces only.</span>
+  </div>
+
+  <label class="form-label" for="newGenre">Genre</label>
+  <select class="form-input select-input" id="newGenre" formControlName="genre">
+    <option value="" selected>Select a genre</option>
+    <option *ngFor="let g of genres" [value]="g">{{ g }}</option>
+  </select>
+
+  <label class="form-label" for="newPrice">Book Price</label>
+  <input class="form-input" id="newPrice" type="number" inputmode="decimal" min="0.01" step="any" placeholder="book price" formControlName="price">
+  <div class="error" *ngIf="priceCtrl?.touched && priceCtrl?.invalid">
+    <span *ngIf="priceCtrl?.errors?.['required']">Price is required.</span>
+  </div>
+
+  <div class="form-actions">
+    <button class="form-button" type="submit">Add book</button>
+    <button class="form-button secondary" type="button" (click)="resetForm()">Reset</button>
+  </div>
+</form>
+
+<div class="error-summary" *ngIf="errorMessages.length">
+  <p>Please fix the following:</p>
+  <ul>
+    <li *ngFor="let err of errorMessages">{{ err }}</li>
+  </ul>
 </div>
+
+<h3 class="list-title">Added Books</h3>
+
+@for (book of books; track book.id) {
+  <h3>
+    <b>* {{ book.title }}</b>
+    <b> | {{ book.desc }}</b>
+    <b> | {{ book.author || 'Unknown author' }}</b>
+    <b> | {{ book.genre || 'Unspecified genre' }}</b>
+    <b> | {{ book.price | currency:'USD':'symbol':'1.2-2' }}</b>
+    <button (click)="deleteBook(book.id)">Delete book</button>
+  </h3>
+} @empty {
+  <p>No books available</p>
+}
+
+<router-outlet />
